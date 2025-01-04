@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model User {
+  id                   Int                      @id @default(autoincrement())
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  email                String                   @unique
+  phonenum             String                   @default("")
+  password             String
+  tags                 String[]
+  notifactions         Notification[]
+  engagmentHistory     EngagementLog[]
+  role                 Role                     @default(USER)
+  firstname            String                   @default("")
+  lastname             String                   @default("")
+  pronouns             String                   @default("")
+  about                String                   @default("")
+  image                String                   @default("")
+  confirmedEngagements Engagement[]             @relation("ConfirmedSpeakers")
+  pendingEngagements   Engagement[]             @relation("PendingSpeakers")
+  rejectedEngagements  Engagement[]             @relation("RejectedSpeakers")
+}
+
+model Engagement {
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  title             String
+  start             DateTime
+  end               DateTime
+  image             String
+  status            String
+  tags              String[]
+  sitename          String
+  address           String
+  description       String
+  capacity          Int
+  confirmedSpeakers User[]   @relation("ConfirmedSpeakers")
+  pendingSpeakers   User[]   @relation("PendingSpeakers")
+  rejectedSpeakers  User[]   @relation("RejectedSpeakers")
+}
+
+model EngagementLog {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  engagementId Int
+  userId       Int
+  title        String
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model Invite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String
+  role      Role
+  code      String   @unique
+}
+
+model Email {
+  id         Int    @id @default(autoincrement())
+  subject    String
+  message    String
+  recipients String[]
+}
+
+model ForgotPassword {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String
+  code      String   @unique
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
+
+model DefaultEmail {
+  id      Int    @id @default(autoincrement())
+  name    String @unique
+  message String
+}
+
+enum Role {
+  USER
+  ADMIN
+}
